@@ -113,5 +113,15 @@ class Parser {
                 }
             }
         }
+
+        fun convertDuremidam(html: Element, regexForPrice: Regex): List<MenuInfo> {
+            return if (html.text().contains("셀프(뷔페)코너")) {
+                val menuName = "셀프 코너 - ${html.select("p")[1].text()}"
+                val price = 6000
+                mutableListOf(MenuInfo(menuName, price, null))
+            } else {
+                html.select("p").map { getMenuInfo(it.text(), regexForPrice) }.toMutableList()
+            }
+        }
     }
 }
