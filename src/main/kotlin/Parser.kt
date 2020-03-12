@@ -3,23 +3,30 @@ import java.awt.Menu
 
 class Parser {
     companion object {
-        fun convertGeneralCase(html: Element): List<MenuInfo> {
+        fun convertGeneralCase(html: Element, regexForPrice: Regex): List<MenuInfo> {
 
             return if (html.select("br").isEmpty()) {
-                html.select("p").map { getMenuInfo(it.text()) }.toMutableList()
+                html.select("p").map { getMenuInfo(it.text(), regexForPrice) }.toMutableList()
             }
             else {
                 val longStr = html.select("p")[0].text()
 
-                longStr.split("<br />").map { getMenuInfo(it) }.toMutableList()
+                longStr.split("<br />").map { getMenuInfo(it, regexForPrice) }.toMutableList()
             }
         }
 
-        fun getMenuInfo(str: String): MenuInfo {
-            val regexForPrice = Regex("[0-9,]+원")
+        fun getMenuInfo(str: String, regexForPrice: Regex): MenuInfo {
             val priceStr = regexForPrice.find(str)
 
-            val price = priceStr?.value?.replace(",", "")?.replace("원", "")?.toInt()
+            val price = priceStr?.value
+                ?.replace(",", "")
+                ?.replace("원", "")
+                ?.let{
+                    if(it.contains('.')) {
+                        (it.toDouble() * 1000).toInt()
+                    }
+                    else it.toInt()
+                }
             var menuName: String? = null
             var msg: String? = null
 
@@ -48,9 +55,9 @@ class Parser {
             return arrayOf(name?.substring(0, name.length - 1), contact?.substring(1, contact.length - 1))
         }
 
-        fun convert4Sicdang(floor: Int, html: Element): List<MenuInfo> {
+        fun convert4Sicdang(floor: Int, html: Element, regexForPrice: Regex): List<MenuInfo> {
             val menuInfos = html.select("p").map {
-                    getMenuInfo(it.text())
+                    getMenuInfo(it.text(), regexForPrice)
                 }
 
             var firstFloorIdx: Int? = null
