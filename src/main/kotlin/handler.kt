@@ -32,6 +32,10 @@ class Crawler: RequestHandler<Req, Unit> {
                             val breakfast = convertGeneralCase(infos[1], regexForPrice)
                             val lunch = convertGeneralCase(infos[2], regexForPrice)
                             val dinner = convertGeneralCase(infos[3], regexForPrice)
+
+//                            println(breakfast)
+//                            println(lunch)
+//                            println(dinner)
                         }
                         restaurant[0] == "두레미담" -> {
                             val regexForPrice = Regex("[0-9,]+원")
@@ -39,6 +43,10 @@ class Crawler: RequestHandler<Req, Unit> {
                             val breakfast = convertDuremidam(infos[1], regexForPrice)
                             val lunch = convertDuremidam(infos[2], regexForPrice)
                             val dinner = convertDuremidam(infos[3], regexForPrice)
+
+//                            println(breakfast)
+//                            println(lunch)
+//                            println(dinner)
                         }
                         restaurant[0] == "4식당" -> {
                             val regexForPrice = Regex("[0-9,]+원")
@@ -55,6 +63,12 @@ class Crawler: RequestHandler<Req, Unit> {
                             val secondLunch = convert4Sicdang(2, infos[2], regexForPrice)
                             val secondDinner = convert4Sicdang(2, infos[3], regexForPrice)
 
+//                            println(firstBreakfast)
+//                            println(firstLunch)
+//                            println(firstDinner)
+//                            println(secondBreakfast)
+//                            println(secondLunch)
+//                            println(secondDinner)
                         }
                         restaurant[0] == "301동식당" -> {
                             val regexForPrice = Regex("[0-9,]+원")
@@ -70,6 +84,13 @@ class Crawler: RequestHandler<Req, Unit> {
                             val secondBreakfast = convert301(2, infos[1], regexForPrice)
                             val secondLunch = convert301(2, infos[2], regexForPrice)
                             val secondDinner = convert301(2, infos[3], regexForPrice)
+
+//                            println(firstBreakfast)
+//                            println(firstLunch)
+//                            println(firstDinner)
+//                            println(secondBreakfast)
+//                            println(secondLunch)
+//                            println(secondDinner)
                         }
                         restaurant[0] == "220동식당" -> {
                             val regexForPrice = Regex("[0-9]\\.[0-9]")
@@ -77,6 +98,10 @@ class Crawler: RequestHandler<Req, Unit> {
                             val breakfast = convertGeneralCase(infos[1], regexForPrice)
                             val lunch = convertGeneralCase(infos[2], regexForPrice)
                             val dinner = convertGeneralCase(infos[3], regexForPrice)
+
+//                            println(breakfast)
+//                            println(lunch)
+//                            println(dinner)
                         }
                     }
             }

@@ -1,3 +1,4 @@
+import SpecialCharacterHandler.Companion.decode
 import org.jsoup.nodes.Element
 import java.awt.Menu
 
@@ -6,11 +7,11 @@ class Parser {
         fun convertGeneralCase(html: Element, regexForPrice: Regex): List<MenuInfo> {
 
             return if (html.select("br").isEmpty()) {
-                html.select("p").map { getMenuInfo(it.text(), regexForPrice) }.toMutableList()
+                html.select("p").map { getMenuInfo(decode(it.text()), regexForPrice) }.toMutableList()
             }
             else {
                 val longStr = html.select("p")[0].html()
-                longStr.split("<br />").map { getMenuInfo(it, regexForPrice) }.toMutableList()
+                longStr.split("<br />").map { getMenuInfo(decode(it), regexForPrice) }.toMutableList()
             }
         }
 
@@ -56,7 +57,7 @@ class Parser {
 
         fun convert4Sicdang(floor: Int, html: Element, regexForPrice: Regex): List<MenuInfo> {
             val menuInfos = html.select("p").map {
-                    getMenuInfo(it.text(), regexForPrice)
+                    getMenuInfo(decode(it.text()), regexForPrice)
                 }
 
             var firstFloorIdx: Int? = null
@@ -82,7 +83,7 @@ class Parser {
 
                     longStr.split("<br />")
                         .map {
-                            getMenuInfo(it, regexForPrice)
+                            getMenuInfo(decode(it), regexForPrice)
                         }
                         .toMutableList()
                         .let { it.subList(1, it.size) }
@@ -93,8 +94,8 @@ class Parser {
                 if(html.text().contains("교직원식당")) {
                     val ret = mutableListOf<MenuInfo>()
 
-                    val longStr1 = html.select("p")[1].html()
-                    val longStr2 = html.select("p")[2].html()
+                    val longStr1 = decode(html.select("p")[1].html())
+                    val longStr2 = decode(html.select("p")[2].html())
 
                     val menuTypeOneName = "봄 - ${longStr1.split("<br />")[2]}"
                     val price = 6000
@@ -116,11 +117,11 @@ class Parser {
 
         fun convertDuremidam(html: Element, regexForPrice: Regex): List<MenuInfo> {
             return if (html.text().contains("셀프(뷔페)코너")) {
-                val menuName = "셀프 코너 - ${html.select("p")[1].text()}"
+                val menuName = "셀프 코너 - ${decode(html.select("p")[1].text())}"
                 val price = 6000
                 mutableListOf(MenuInfo(menuName, price, null))
             } else {
-                html.select("p").map { getMenuInfo(it.text(), regexForPrice) }.toMutableList()
+                html.select("p").map { getMenuInfo(decode(it.text()), regexForPrice) }.toMutableList()
             }
         }
     }
