@@ -1,3 +1,4 @@
+import Parser.Companion.convert301
 import Parser.Companion.convert4Sicdang
 import Parser.Companion.convertGeneralCase
 import Parser.Companion.separateContact
@@ -23,8 +24,8 @@ class Crawler: RequestHandler<Req, Unit> {
                     if (restaurant[0] == "공대간이식당" || restaurant[0] == "소담마루" || restaurant[0] == "샤반" || restaurant[0] == "라운지오")
                         return@lit
 
-                    println(it)
-                    println()
+//                    println(it)
+//                    println()
 
                     when {
                         isGeneralCase(restaurant[0]) -> {
@@ -32,6 +33,10 @@ class Crawler: RequestHandler<Req, Unit> {
                             val breakfast = convertGeneralCase(infos[1], regexForPrice)
                             val lunch = convertGeneralCase(infos[2], regexForPrice)
                             val dinner = convertGeneralCase(infos[3], regexForPrice)
+
+//                            println(breakfast)
+//                            println(lunch)
+//                            println(dinner)
                         }
 //                        restaurant[0] == "두레미담" -> {
 //                            val breakfast = convertDuremidam(infos[1])
@@ -54,15 +59,26 @@ class Crawler: RequestHandler<Req, Unit> {
                             val secondDinner = convert4Sicdang(2, infos[3], regexForPrice)
 
                         }
-//                        restaurant[0] == "301동식당" -> {
-//                            val firstBreakfast = convert301(1, infos[1])
-//                            val firstLunch = convert301(1, infos[2])
-//                            val firstDinner = convert301(1, infos[3])
-//
-//                            val secondBreakfast = convert301(2, infos[1])
-//                            val secondLunch = convert301(2, infos[2])
-//                            val secondDinner = convert301(2, infos[3])
-//                        }
+                        restaurant[0] == "301동식당" -> {
+                            val regexForPrice = Regex("[0-9,]+원")
+
+                            val firstBreakfast = convert301(1, infos[1], regexForPrice)
+                            val firstLunch = convert301(1, infos[2], regexForPrice)
+                            val firstDinner = convert301(1, infos[3], regexForPrice)
+
+                            println(firstBreakfast)
+                            println(firstLunch)
+                            println(firstDinner)
+                            println("=====")
+
+                            val secondBreakfast = convert301(2, infos[1], regexForPrice)
+                            val secondLunch = convert301(2, infos[2], regexForPrice)
+                            val secondDinner = convert301(2, infos[3], regexForPrice)
+
+                            println(secondBreakfast)
+                            println(secondLunch)
+                            println(secondDinner)
+                        }
                         restaurant[0] == "220동식당" -> {
                             val regexForPrice = Regex("[0-9]\\.[0-9]")
                             val breakfast = convertGeneralCase(infos[1], regexForPrice)

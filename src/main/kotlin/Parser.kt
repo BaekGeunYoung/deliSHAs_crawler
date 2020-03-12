@@ -9,8 +9,7 @@ class Parser {
                 html.select("p").map { getMenuInfo(it.text(), regexForPrice) }.toMutableList()
             }
             else {
-                val longStr = html.select("p")[0].text()
-
+                val longStr = html.select("p")[0].html()
                 longStr.split("<br />").map { getMenuInfo(it, regexForPrice) }.toMutableList()
             }
         }
@@ -73,6 +72,45 @@ class Parser {
                 else menuInfos.subList(secondFloorIdx!! + 1, menuInfos.size)
             } else {
                 menuInfos
+            }
+        }
+
+        fun convert301(case: Int, html: Element, regexForPrice: Regex): List<MenuInfo> {
+            if(case == 1) {
+                return if(html.text().contains("301푸드코트")) {
+                    val longStr = html.select("p")[0].html()
+
+                    longStr.split("<br />")
+                        .map {
+                            getMenuInfo(it, regexForPrice)
+                        }
+                        .toMutableList()
+                        .let { it.subList(1, it.size) }
+                } else {
+                    listOf()
+                }
+            } else {
+                if(html.text().contains("교직원식당")) {
+                    val ret = mutableListOf<MenuInfo>()
+
+                    val longStr1 = html.select("p")[1].html()
+                    val longStr2 = html.select("p")[2].html()
+
+                    val menuTypeOneName = "봄 - ${longStr1.split("<br />")[2]}"
+                    val price = 6000
+
+                    ret.add(MenuInfo(menuTypeOneName, price, null))
+
+                    val typeTwoMenus = longStr2.split("<br />")
+                        .let { it.subList(1, it.size) }
+                        .map { MenuInfo("소반 - $it", 5500, null) }
+
+                    ret.addAll(typeTwoMenus)
+
+                    return ret
+                } else {
+                    return listOf()
+                }
             }
         }
     }
