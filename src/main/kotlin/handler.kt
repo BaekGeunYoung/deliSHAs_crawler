@@ -9,9 +9,11 @@ import org.jsoup.Jsoup
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.sql.Connection
 
 class Crawler: RequestHandler<Req, Unit> {
     private val dataSource = DataSource()
+    private val connection = dataSource.getConnection()
 
     override fun handleRequest(input: Req?, context: Context) {
         val logger = context.logger
@@ -19,6 +21,9 @@ class Crawler: RequestHandler<Req, Unit> {
         val today = LocalDate.now()
 
         val baseUrl = Constants.BASE_CRAWL_URL
+
+        // 이전에 저장돼있던 메뉴들을 모두 삭제한다.
+        deleteAll()
 
         for (i in (0 until 7)) {
             val date = today.plusDays(i.toLong())
@@ -158,47 +163,57 @@ class Crawler: RequestHandler<Req, Unit> {
 //            println()
 //        }
 
-        ret.forEach {
-            // 이전에 저장돼있던 메뉴들을 모두 삭제한다.
-            deleteAll()
 
+        ret.forEach {
             // menu에 담긴 restaurantName으로 restaurant를 조회, restaurant_id를 가져온다.
             val restaurantId = getRestaurantId(it)
 
             // 가져온 restaurant_id를 foreign key로 설정해 menu 값을 db에 넣는다.
-            insertMenu(it, restaurantId)
+            insertMenu(it, restaurantId, date)
         }
     }
 
-    private fun deleteAll() {
-        val connection = dataSource.getConnection()
-        val deleteAllQuery = "DELETE FROM menu;"
+    fun deleteAll() {
+        val deleteAllQuery = "DELETE FROM fake_menu WHERE id > 0;"
         val preparedStatement = connection.prepareStatement(deleteAllQuery)
-        preparedStatement.execute()
-        // 성공 / 실패에 따라 로그 남기기
+        preparedStatement.executeUpdate()
+        println("delete success")
+//        if(preparedStatement.execute()) {
+//            println("delete success")
+//        } else {
+//            println("delete fail")
+//        }
     }
 
     private fun getRestaurantId(menu: Menu): Long {
-        val connection = dataSource.getConnection()
-        val getRestaurantIdQuery = "SELECT id FROM restaurant WHERE name = ${menu.restaurantName};"
+        val getRestaurantIdQuery = "SELECT id FROM fake_restaurant WHERE name = '${menu.restaurantName}';"
         val preparedStatement = connection.prepareStatement(getRestaurantIdQuery)
         val resultSet = preparedStatement.executeQuery()
 
         if(resultSet.next()) {
-            return resultSet.getLong("id")
-        } else throw Exception()
-        // 성공/실패에 따라 로그 남기기
+            val restaurantId = resultSet.getLong("id")
+            println("getRestaurantId success : $restaurantId, ${menu.restaurantName}")
+            return restaurantId
+        } else {
+            throw Exception("getRestaurantId fail : ${menu.restaurantName}")
+        }
     }
 
-    private fun insertMenu(menu: Menu, restaurantId: Long) {
-        val connection = dataSource.getConnection()
+    private fun insertMenu(menu: Menu, restaurantId: Long, date: LocalDate) {
+        println("insertMenu start : $menu, $restaurantId")
+
         val now = LocalDateTime.now()
-        val insertMenuQuery = "INSERT INTO menu (name, price, time, msg, restaurant_id, created_at, updated_at)" +
-                " VALUES (${menu.name}, ${menu.price}, ${menu.time}, ${menu.msg}, $restaurantId, $now, $now);"
+        val insertMenuQuery = "INSERT INTO fake_menu (name, price, meal_time, msg, restaurant_id, date, created_at, updated_at)" +
+                " VALUES ('${menu.name?.trim()}', ${menu.price}, ${menu.time.ordinal}, '${menu.msg}', $restaurantId, '$date', '$now', '$now');"
 
         val preparedStatement = connection.prepareStatement(insertMenuQuery)
-        preparedStatement.execute()
-        // 성공/실패에 따라 로그 남기기
+        preparedStatement.executeUpdate()
+        println("insertMenu success : ${menu.name}")
+//        if(preparedStatement.execute()) {
+//            println("insertMenu success : ${menu.name}")
+//        } else {
+//            println("insertMenu fail : ${menu.name}")
+//        }
     }
 
 
