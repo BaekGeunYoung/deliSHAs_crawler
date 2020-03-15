@@ -11,7 +11,14 @@ class Parser {
             }
             else {
                 val longStr = html.select("p")[0].html()
-                longStr.split("<br />").map { getMenuInfo(decode(it), regexForPrice) }.toMutableList()
+                val validMenuStr = mutableListOf<String>()
+
+                longStr.split("<br />")
+                    .forEach {
+                        if (!decode(it).trim().isBlank()) validMenuStr += it
+                    }
+
+                validMenuStr.map { getMenuInfo(decode(it), regexForPrice) }.toMutableList()
             }
         }
 
@@ -81,7 +88,14 @@ class Parser {
                 return if(html.text().contains("301푸드코트")) {
                     val longStr = html.select("p")[0].html()
 
+                    val validMenuStr = mutableListOf<String>()
+
                     longStr.split("<br />")
+                        .forEach {
+                            if (!decode(it).isBlank()) validMenuStr += it
+                        }
+
+                    validMenuStr
                         .map {
                             getMenuInfo(decode(it), regexForPrice)
                         }
@@ -102,7 +116,14 @@ class Parser {
 
                     ret.add(MenuInfo(menuTypeOneName, price, null))
 
-                    val typeTwoMenus = longStr2.split("<br />")
+                    val validMenuStr = mutableListOf<String>()
+
+                    longStr2.split("<br />")
+                        .forEach {
+                            if (!decode(it).isBlank()) validMenuStr += it
+                        }
+
+                    val typeTwoMenus = validMenuStr
                         .let { it.subList(1, it.size) }
                         .map { MenuInfo("소반 - $it", 5500, null) }
 
