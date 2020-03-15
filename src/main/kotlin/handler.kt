@@ -9,13 +9,12 @@ import org.jsoup.Jsoup
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.sql.Connection
 
-class Crawler: RequestHandler<Req, Unit> {
+class Crawler: RequestHandler<Any, Unit> {
     private val dataSource = DataSource()
     private val connection = dataSource.getConnection()
 
-    override fun handleRequest(input: Req?, context: Context) {
+    override fun handleRequest(input: Any?, context: Context) {
         val logger = context.logger
         val formatter = DateTimeFormatter.ofPattern("MM/dd/YYYY")
         val today = LocalDate.now()
@@ -203,8 +202,8 @@ class Crawler: RequestHandler<Req, Unit> {
         println("insertMenu start : $menu, $restaurantId")
 
         val now = LocalDateTime.now()
-        val insertMenuQuery = "INSERT INTO fake_menu (name, price, meal_time, msg, restaurant_id, date, created_at, updated_at)" +
-                " VALUES ('${menu.name?.trim()}', ${menu.price}, ${menu.time.ordinal}, '${menu.msg}', $restaurantId, '$date', '$now', '$now');"
+        val insertMenuQuery = "INSERT INTO fake_menu (name, price, meal_time, msg, restaurant_id, date, is_valid, created_at, updated_at)" +
+                " VALUES ('${menu.name?.trim()}', ${menu.price}, ${menu.time.ordinal}, '${menu.msg}', $restaurantId, '$date', ${menu.isValid}, '$now', '$now');"
 
         val preparedStatement = connection.prepareStatement(insertMenuQuery)
         preparedStatement.executeUpdate()

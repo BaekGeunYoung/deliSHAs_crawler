@@ -8,7 +8,8 @@ data class RestaurantInfo(
 data class MenuInfo(
     val name: String?,
     val price: Int?,
-    val msg: String?
+    var msg: String?,
+    var isValid: Boolean = true
 )
 
 data class Menu(
@@ -17,7 +18,8 @@ data class Menu(
     val date: LocalDate,
     val name: String?,
     val price: Int?,
-    val msg: String?
+    val msg: String?,
+    val isValid: Boolean
 ) {
     companion object {
         fun of(restaurantName: String, menuInfo: MenuInfo, time: Time, date: LocalDate): Menu {
@@ -27,7 +29,8 @@ data class Menu(
                 date = date,
                 name = menuInfo.name,
                 price = menuInfo.price,
-                msg = menuInfo.msg
+                msg = menuInfo.msg,
+                isValid = menuInfo.isValid
             )
         }
     }
