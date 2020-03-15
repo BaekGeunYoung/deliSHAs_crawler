@@ -56,10 +56,6 @@ class Crawler: RequestHandler<Any, Unit> {
                             val lunch = convertGeneralCase(infos[2], regexForPrice)
                             val dinner = convertGeneralCase(infos[3], regexForPrice)
 
-//                            println(breakfast)
-//                            println(lunch)
-//                            println(dinner)
-
                             ret.addAll(breakfast.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.BREAKFAST, date) })
                             ret.addAll(lunch.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.LUNCH, date) })
                             ret.addAll(dinner.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.DINNER, date) })
@@ -71,10 +67,6 @@ class Crawler: RequestHandler<Any, Unit> {
                             val breakfast = convertDuremidam(infos[1], regexForPrice)
                             val lunch = convertDuremidam(infos[2], regexForPrice)
                             val dinner = convertDuremidam(infos[3], regexForPrice)
-
-//                            println(breakfast)
-//                            println(lunch)
-//                            println(dinner)
 
                             ret.addAll(breakfast.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.BREAKFAST, date) })
                             ret.addAll(lunch.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.LUNCH, date) })
@@ -94,13 +86,6 @@ class Crawler: RequestHandler<Any, Unit> {
                             val secondBreakfast = convert4Sicdang(2,infos[1], regexForPrice)
                             val secondLunch = convert4Sicdang(2, infos[2], regexForPrice)
                             val secondDinner = convert4Sicdang(2, infos[3], regexForPrice)
-
-//                            println(firstBreakfast)
-//                            println(firstLunch)
-//                            println(firstDinner)
-//                            println(secondBreakfast)
-//                            println(secondLunch)
-//                            println(secondDinner)
 
                             ret.addAll(firstBreakfast.map { menuInfo -> Menu.of(firstRestaurantName, menuInfo, Time.BREAKFAST, date) })
                             ret.addAll(firstLunch.map { menuInfo -> Menu.of(firstRestaurantName, menuInfo, Time.LUNCH, date) })
@@ -124,13 +109,6 @@ class Crawler: RequestHandler<Any, Unit> {
                             val secondLunch = convert301(2, infos[2], regexForPrice)
                             val secondDinner = convert301(2, infos[3], regexForPrice)
 
-//                            println(firstBreakfast)
-//                            println(firstLunch)
-//                            println(firstDinner)
-//                            println(secondBreakfast)
-//                            println(secondLunch)
-//                            println(secondDinner)
-
                             ret.addAll(firstBreakfast.map { menuInfo -> Menu.of(firstRestaurantName, menuInfo, Time.BREAKFAST, date) })
                             ret.addAll(firstLunch.map { menuInfo -> Menu.of(firstRestaurantName, menuInfo, Time.LUNCH, date) })
                             ret.addAll(firstDinner.map { menuInfo -> Menu.of(firstRestaurantName, menuInfo, Time.DINNER, date) })
@@ -145,10 +123,6 @@ class Crawler: RequestHandler<Any, Unit> {
                             val lunch = convertGeneralCase(infos[2], regexForPrice)
                             val dinner = convertGeneralCase(infos[3], regexForPrice)
 
-//                            println(breakfast)
-//                            println(lunch)
-//                            println(dinner)
-
                             ret.addAll(breakfast.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.BREAKFAST, date) })
                             ret.addAll(lunch.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.LUNCH, date) })
                             ret.addAll(dinner.map { menuInfo -> Menu.of(restaurant[0]!!, menuInfo, Time.DINNER, date) })
@@ -156,12 +130,6 @@ class Crawler: RequestHandler<Any, Unit> {
                     }
             }
         }
-
-//        ret.forEach {
-//            println(it)
-//            println()
-//        }
-
 
         ret.forEach {
             // menu에 담긴 restaurantName으로 restaurant를 조회, restaurant_id를 가져온다.
@@ -177,11 +145,6 @@ class Crawler: RequestHandler<Any, Unit> {
         val preparedStatement = connection.prepareStatement(deleteAllQuery)
         preparedStatement.executeUpdate()
         println("delete success")
-//        if(preparedStatement.execute()) {
-//            println("delete success")
-//        } else {
-//            println("delete fail")
-//        }
     }
 
     private fun getRestaurantId(menu: Menu): Long {
@@ -208,11 +171,6 @@ class Crawler: RequestHandler<Any, Unit> {
         val preparedStatement = connection.prepareStatement(insertMenuQuery)
         preparedStatement.executeUpdate()
         println("insertMenu success : ${menu.name}")
-//        if(preparedStatement.execute()) {
-//            println("insertMenu success : ${menu.name}")
-//        } else {
-//            println("insertMenu fail : ${menu.name}")
-//        }
     }
 
 
