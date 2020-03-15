@@ -4,10 +4,19 @@ import java.awt.Menu
 
 class Parser {
     companion object {
-        fun convertGeneralCase(html: Element, regexForPrice: Regex): List<MenuInfo> {
+        fun separateContact(str: String): Array<String?> {
+            val regexForName = Regex(".*\\(")
+            val regexForContact = Regex("\\(.*\\)")
 
+            val name = regexForName.find(str)?.value
+            val contact = regexForContact.find(str)?.value
+
+            return arrayOf(name?.substring(0, name.length - 1), contact?.substring(1, contact.length - 1))
+        }
+
+        fun convertGeneralCase(html: Element, regexForPrice: Regex): List<MenuInfo> {
             return if (html.select("br").isEmpty()) {
-                html.select("p").map { getMenuInfo(decode(it.text()), regexForPrice) }.toMutableList()
+                handleMessage(html.select("p").map { getMenuInfo(decode(it.text()), regexForPrice) }.toMutableList())
             }
             else {
                 val longStr = html.select("p")[0].html()
@@ -18,48 +27,8 @@ class Parser {
                         if (!decode(it).trim().isBlank()) validMenuStr += it
                     }
 
-                validMenuStr.map { getMenuInfo(decode(it), regexForPrice) }.toMutableList()
+                handleMessage(validMenuStr.map { getMenuInfo(decode(it), regexForPrice) }.toMutableList())
             }
-        }
-
-        fun getMenuInfo(str: String, regexForPrice: Regex): MenuInfo {
-            val priceStr = regexForPrice.find(str)
-
-            val price = priceStr?.value
-                ?.replace(",", "")
-                ?.replace("원", "")
-                ?.let{
-                    if(it.contains('.')) {
-                        (it.toDouble() * 1000).toInt()
-                    }
-                    else it.toInt()
-                }
-            var menuName: String? = null
-            var msg: String? = null
-
-            priceStr?.let { mat ->
-                menuName = str.substring(0, mat.range.first - 1)
-            }
-
-            if (price == null || menuName == null) {
-                msg = str
-            }
-
-            return MenuInfo(
-                name = menuName,
-                price = price,
-                msg = msg
-            )
-        }
-
-        fun separateContact(str: String): Array<String?> {
-            val regexForName = Regex(".*\\(")
-            val regexForContact = Regex("\\(.*\\)")
-
-            val name = regexForName.find(str)?.value
-            val contact = regexForContact.find(str)?.value
-
-            return arrayOf(name?.substring(0, name.length - 1), contact?.substring(1, contact.length - 1))
         }
 
         fun convert4Sicdang(floor: Int, html: Element, regexForPrice: Regex): List<MenuInfo> {
@@ -76,10 +45,10 @@ class Parser {
             }
 
             return if (firstFloorIdx != null && secondFloorIdx != null) {
-                if (floor == 1) menuInfos.subList(1, secondFloorIdx!!)
-                else menuInfos.subList(secondFloorIdx!! + 1, menuInfos.size)
+                if (floor == 1) handleMessage(menuInfos.subList(1, secondFloorIdx!!))
+                else handleMessage(menuInfos.subList(secondFloorIdx!! + 1, menuInfos.size))
             } else {
-                menuInfos
+                handleMessage(menuInfos)
             }
         }
 
@@ -95,12 +64,9 @@ class Parser {
                             if (!decode(it).isBlank()) validMenuStr += it
                         }
 
-                    validMenuStr
-                        .map {
-                            getMenuInfo(decode(it), regexForPrice)
-                        }
+                    validMenuStr.map { getMenuInfo(decode(it), regexForPrice) }
                         .toMutableList()
-                        .let { it.subList(1, it.size) }
+                        .let { handleMessage(it.subList(1, it.size)) }
                 } else {
                     listOf()
                 }
@@ -142,8 +108,58 @@ class Parser {
                 val price = 6000
                 mutableListOf(MenuInfo(menuName, price, null))
             } else {
-                html.select("p").map { getMenuInfo(decode(it.text()), regexForPrice) }.toMutableList()
+                handleMessage(html.select("p")
+                    .map { getMenuInfo(decode(it.text()), regexForPrice) }
+                    .toMutableList())
             }
+        }
+
+        private fun handleMessage(menuInfoList: List<MenuInfo>): List<MenuInfo> {
+            val ret: List<MenuInfo> = mutableListOf<MenuInfo>().apply { addAll(menuInfoList) }
+
+            if (ret.any { it.msg != null }) {
+                var msg = ""
+                ret.forEach {
+                    if (it.msg != null) msg += " ${it.msg}"
+                }
+
+                ret.forEach {
+                    it.msg = msg
+                    it.isValid = false
+                }
+            }
+
+            return ret
+        }
+
+        private fun getMenuInfo(str: String, regexForPrice: Regex): MenuInfo {
+            val priceStr = regexForPrice.find(str)
+
+            val price = priceStr?.value
+                ?.replace(",", "")
+                ?.replace("원", "")
+                ?.let{
+                    if(it.contains('.')) {
+                        (it.toDouble() * 1000).toInt()
+                    }
+                    else it.toInt()
+                }
+            var menuName: String? = null
+            var msg: String? = null
+
+            priceStr?.let { mat ->
+                menuName = str.substring(0, mat.range.first - 1)
+            }
+
+            if (price == null || menuName == null) {
+                msg = str
+            }
+
+            return MenuInfo(
+                name = menuName,
+                price = price,
+                msg = msg
+            )
         }
     }
 }
