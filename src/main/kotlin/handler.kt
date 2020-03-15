@@ -24,12 +24,14 @@ class Crawler: RequestHandler<Any, Unit> {
         // 이전에 저장돼있던 메뉴들을 모두 삭제한다.
         deleteAll()
 
-        for (i in (0 until 7)) {
+        for (i in (0 until Constants.CRAWL_DAYS_UNTIL)) {
             val date = today.plusDays(i.toLong())
             val day = formatter.format(date)
             val url = "$baseUrl?field_menu_date_value_1[value][date]=&field_menu_date_value[value][date]=$day"
 
+            println("crawling start : $day")
             crawl(url, date)
+            println("==========================================================================")
         }
     }
 
