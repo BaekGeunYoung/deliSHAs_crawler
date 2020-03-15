@@ -24,7 +24,7 @@ class Parser {
 
                 longStr.split("<br />")
                     .forEach {
-                        if (!decode(it).trim().isBlank()) validMenuStr += it
+                        if (!decode(it).isBlank()) validMenuStr += it
                     }
 
                 handleMessage(validMenuStr.map { getMenuInfo(decode(it), regexForPrice) }.toMutableList())
@@ -77,7 +77,7 @@ class Parser {
                     val longStr1 = decode(html.select("p")[1].html())
                     val longStr2 = decode(html.select("p")[2].html())
 
-                    val menuTypeOneName = "봄 - ${longStr1.split("<br />")[2]}"
+                    val menuTypeOneName = "봄 - ${longStr1.split("<br />")[2].trim()}"
                     val price = 6000
 
                     ret.add(MenuInfo(menuTypeOneName, price, null))
@@ -91,7 +91,7 @@ class Parser {
 
                     val typeTwoMenus = validMenuStr
                         .let { it.subList(1, it.size) }
-                        .map { MenuInfo("소반 - $it", 5500, null) }
+                        .map { MenuInfo("소반 - ${it.trim()}", 5500, null) }
 
                     ret.addAll(typeTwoMenus)
 
@@ -104,7 +104,7 @@ class Parser {
 
         fun convertDuremidam(html: Element, regexForPrice: Regex): List<MenuInfo> {
             return if (html.text().contains("셀프(뷔페)코너")) {
-                val menuName = "셀프 코너 - ${decode(html.select("p")[1].text())}"
+                val menuName = "셀프 코너 - ${decode(html.select("p")[1].text()).trim()}"
                 val price = 6000
                 mutableListOf(MenuInfo(menuName, price, null))
             } else {
