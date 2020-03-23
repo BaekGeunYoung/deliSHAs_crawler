@@ -143,14 +143,14 @@ class Crawler: RequestHandler<Any, Unit> {
     }
 
     fun deleteAll() {
-        val deleteAllQuery = "DELETE FROM fake_menu WHERE id > 0;"
+        val deleteAllQuery = "DELETE FROM menu WHERE id > 0;"
         val preparedStatement = connection.prepareStatement(deleteAllQuery)
         preparedStatement.executeUpdate()
         println("delete success")
     }
 
     private fun getRestaurantId(menu: Menu): Long {
-        val getRestaurantIdQuery = "SELECT id FROM fake_restaurant WHERE name = '${menu.restaurantName}';"
+        val getRestaurantIdQuery = "SELECT id FROM restaurant WHERE name = '${menu.restaurantName}';"
         val preparedStatement = connection.prepareStatement(getRestaurantIdQuery)
         val resultSet = preparedStatement.executeQuery()
 
@@ -167,8 +167,8 @@ class Crawler: RequestHandler<Any, Unit> {
         println("insertMenu start : $menu, $restaurantId")
 
         val now = LocalDateTime.now()
-        val insertMenuQuery = "INSERT INTO fake_menu (name, price, meal_time, msg, restaurant_id, date, is_valid, created_at, updated_at)" +
-                " VALUES ('${menu.name?.trim()}', ${menu.price}, ${menu.time.ordinal}, '${menu.msg}', $restaurantId, '$date', ${menu.isValid}, '$now', '$now');"
+        val insertMenuQuery = "INSERT INTO menu (name, price, meal_time, msg, restaurant_id, date, is_valid, created_at, updated_at)" +
+                " VALUES ('${menu.name?.trim()}', ${menu.price}, '${menu.time.name}', '${menu.msg}', $restaurantId, '$date', ${menu.isValid}, '$now', '$now');"
 
         val preparedStatement = connection.prepareStatement(insertMenuQuery)
         preparedStatement.executeUpdate()
