@@ -4,6 +4,7 @@ import Parser.Companion.convertDuremidam
 import Parser.Companion.convertGeneralCase
 import Parser.Companion.separateContact
 import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import org.jsoup.Jsoup
 import java.time.LocalDate
@@ -13,9 +14,10 @@ import java.time.format.DateTimeFormatter
 class Crawler: RequestHandler<Any, Unit> {
     private val dataSource = DataSource()
     private val connection = dataSource.getConnection()
+    private lateinit var logger: LambdaLogger
 
     override fun handleRequest(input: Any?, context: Context) {
-        val logger = context.logger
+        logger = context.logger
         val formatter = DateTimeFormatter.ofPattern("MM/dd/YYYY")
         val today = LocalDate.now()
 
@@ -29,9 +31,9 @@ class Crawler: RequestHandler<Any, Unit> {
             val day = formatter.format(date)
             val url = "$baseUrl?field_menu_date_value_1[value][date]=&field_menu_date_value[value][date]=$day"
 
-            println("crawling start : $day")
+            printAndLog("crawling start : $day")
             crawl(url, date)
-            println("==========================================================================")
+            printAndLog("==========================================================================")
         }
     }
 
@@ -146,7 +148,7 @@ class Crawler: RequestHandler<Any, Unit> {
         val deleteAllQuery = "DELETE FROM menu WHERE id > 0;"
         val preparedStatement = connection.prepareStatement(deleteAllQuery)
         preparedStatement.executeUpdate()
-        println("delete success")
+        printAndLog("delete success")
     }
 
     private fun getRestaurantId(menu: Menu): Long {
@@ -156,7 +158,7 @@ class Crawler: RequestHandler<Any, Unit> {
 
         if(resultSet.next()) {
             val restaurantId = resultSet.getLong("id")
-            println("getRestaurantId success : $restaurantId, ${menu.restaurantName}")
+            printAndLog("getRestaurantId success : $restaurantId, ${menu.restaurantName}")
             return restaurantId
         } else {
             throw Exception("getRestaurantId fail : ${menu.restaurantName}")
@@ -164,7 +166,7 @@ class Crawler: RequestHandler<Any, Unit> {
     }
 
     private fun insertMenu(menu: Menu, restaurantId: Long, date: LocalDate) {
-        println("insertMenu start : $menu, $restaurantId")
+        printAndLog("insertMenu start : $menu, $restaurantId")
 
         val now = LocalDateTime.now()
         val insertMenuQuery = "INSERT INTO menu (name, price, meal_time, msg, restaurant_id, date, is_valid, created_at, updated_at)" +
@@ -172,7 +174,7 @@ class Crawler: RequestHandler<Any, Unit> {
 
         val preparedStatement = connection.prepareStatement(insertMenuQuery)
         preparedStatement.executeUpdate()
-        println("insertMenu success : ${menu.name}")
+        printAndLog("insertMenu success : ${menu.name}")
     }
 
 
@@ -182,5 +184,10 @@ class Crawler: RequestHandler<Any, Unit> {
                 && restaurantName != "4식당"
                 && restaurantName != "301동식당"
                 && restaurantName != "220동식당"
+    }
+
+    private fun printAndLog(str: String) {
+//        println(str)
+        logger.log(str)
     }
 }
