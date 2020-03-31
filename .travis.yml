@@ -17,35 +17,42 @@ cache:
   directories:
     - '$HOME/.gradle'
 
-script: "./gradlew shadowJar"
+jobs:
+  include:
+    - stage: build
+      before_install:
+        - pyenv global 3.7.1
+        - pip install -U pip
+        - pip install awscli
+      script: "./gradlew shadowJar"
+      deploy:
+        - provider: s3
+          access_key_id: $AWS_ACCESS_KEY
+          secret_access_key: $AWS_SECRET_KEY
+          bucket: snupa
+          region: ap-northeast-2
+          skip_cleanup: true
+          acl: public_read
+          local_dir: build/libs
+          wait-until-deployed: true
+          on:
+            repo: BaekGeunYoung/deliSHAs_crawler
+            branch: master
 
-deploy:
-  - provider: s3
-    access_key_id: $AWS_ACCESS_KEY
-    secret_access_key: $AWS_SECRET_KEY
-    bucket: snupa
-    region: ap-northeast-2
-    skip_cleanup: true
-    acl: public_read
-    local_dir: build/libs
-    wait-until-deployed: true
-    on:
-      repo: BaekGeunYoung/deliSHAs_crawler
-      branch: master
-
-  - provider: cloudformation
-    access_key_id: $AWS_ACCESS_KEY
-    secret_access_key: $AWS_SECRET_KEY
-    template: cloudformation.yml
-    stack_name: DeployCrawler
-    edge: true
-    wait: true
-    parameters:
-      - LambdaCodeBucket=$BUCKET_NAME
-      - LambdaCodeKey=${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar
-      - Lambdahandler=$HANDLER_NAME
-      - JdbcUrl=$JDBC_URL
-      - JdbcPassword=$JDBC_PASSWORD
-    capabilities: CAPABILITY_IAM
-    region: ap-northeast-2
-
+        - provider: cloudformation
+          access_key_id: $AWS_ACCESS_KEY
+          secret_access_key: $AWS_SECRET_KEY
+          template: cloudformation.yml
+          stack_name: DeployCrawler
+          edge: true
+          wait: true
+          parameters:
+            - LambdaCodeBucket=$BUCKET_NAME
+            - LambdaCodeKey=${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar
+            - Lambdahandler=$HANDLER_NAME
+            - JdbcUrl=$JDBC_URL
+            - JdbcPassword=$JDBC_PASSWORD
+          capabilities: CAPABILITY_IAM
+          region: ap-northeast-2
+      after_deploy:
+        - aws lambda update-function-code --s3-bucket=snupa --s3-key=${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar --region=ap-northeast-2 --function-name=arn:aws:lambda:ap-northeast-2:781718076027:function:deliSHAs_crawler_test
