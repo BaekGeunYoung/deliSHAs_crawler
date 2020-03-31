@@ -44,3 +44,4 @@ deploy:
       - LambdaCodeBucket=$BUCKET_NAME
       - LambdaCodeKey="${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar"
       - Lambdahandler=$HANDLER_NAME
+    capabilities: CAPABILITY_IAM
