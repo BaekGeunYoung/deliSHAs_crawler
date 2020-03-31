@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket in which custom lambda code is stored
+  LambdaCodeKey:
+    Type: String
+    Description: Jar file name in which custom lambda code is stored
+    Default: deliSHAs_crawler-1.0-SNAPSHOT-all.jar
+  Lambdahandler:
+    Type: String
+    Description: Python file name which is packed inside the zip file
+    Default: Crawler::handleRequest
+
+Resources:
+  LambdaIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:*'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+
+  CustomResourceLambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: !Ref Lambdahandler
+      Role: !GetAtt LambdaIAMRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Ref LambdaCodeKey
+      Runtime: java11
+      Timeout: 60

@@ -2,6 +2,12 @@ language: java
 jdk:
   - openjdk11
 
+env:
+  - PACKAGE_VERSION="1.1-SNAPSHOT"
+  - PROJECT_NAME="deliSHAs_crawler"
+  - HANDLER_NAME="Crawler::handleRequest"
+  - BUCKET_NAME="snupa"
+
 branches:
   only:
     - master
@@ -25,3 +31,15 @@ deploy:
     on:
       repo: BaekGeunYoung/deliSHAs_crawler
       branch: master
+
+  - provider: cloudformation
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    template: cloudformation.yml
+    stack_name: deploy_crawler
+    edge: true
+    wait: true
+    parameters:
+      - LambdaCodeBucket=$BUCKET_NAME
+      - LambdaCodeKey="${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar"
+      - Lambdahandler=$HANDLER_NAME
