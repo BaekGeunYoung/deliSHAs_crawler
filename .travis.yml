@@ -21,7 +21,6 @@ jobs:
   include:
     - stage: build
       before_install:
-        - pyenv global 3.7.1
         - pip install -U pip
         - pip install awscli
       script: "./gradlew shadowJar"
