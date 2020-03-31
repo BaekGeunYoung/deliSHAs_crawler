@@ -47,6 +47,7 @@ Resources:
     Properties:
       Handler: !Ref Lambdahandler
       Role: !GetAtt LambdaIAMRole.Arn
+      FunctionName: 'deliSHAs_crawler'
       Code:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
