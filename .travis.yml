@@ -44,6 +44,8 @@ deploy:
       - LambdaCodeBucket=$BUCKET_NAME
       - LambdaCodeKey=${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar
       - Lambdahandler=$HANDLER_NAME
+      - JdbcUrl=$JDBC_URL
+      - JdbcPassword=$JDBC_PASSWORD
     capabilities: CAPABILITY_IAM
     region: ap-northeast-2
 

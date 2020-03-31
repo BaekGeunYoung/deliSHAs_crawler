@@ -11,6 +11,12 @@ Parameters:
     Type: String
     Description: Python file name which is packed inside the zip file
     Default: Crawler::handleRequest
+  JdbcUrl:
+    Type: String
+    Description: Jdbc url which lambda function would use
+  JdbcPassword:
+    Type: String
+    Description: Jdbc password for db connection
 
 Resources:
   LambdaIAMRole:
@@ -53,3 +59,10 @@ Resources:
         S3Key: !Ref LambdaCodeKey
       Runtime: java11
       Timeout: 60
+      Environment:
+        Variables:
+          BASE_CRAWL_URL: 'http://snuco.snu.ac.kr/ko/foodmenu'
+          JDBC_DRIVER: 'com.mysql.cj.jdbc.Driver'
+          JDBC_PASSWORD: !Ref JdbcPassword
+          JDBC_URL: !Ref JdbcUrl
+          JDBC_USERNAME: 'root'
