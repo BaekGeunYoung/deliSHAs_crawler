@@ -4,10 +4,10 @@ jdk:
 
 env:
   global:
-    - PACKAGE_VERSION="1.1-SNAPSHOT"
-    - PROJECT_NAME="deliSHAs_crawler"
-    - HANDLER_NAME="Crawler::handleRequest"
-    - BUCKET_NAME="snupa"
+    - PACKAGE_VERSION=1.1-SNAPSHOT
+    - PROJECT_NAME=deliSHAs_crawler
+    - HANDLER_NAME=Crawler::handleRequest
+    - BUCKET_NAME=snupa
 
 branches:
   only:
@@ -42,7 +42,7 @@ deploy:
     wait: true
     parameters:
       - LambdaCodeBucket=$BUCKET_NAME
-      - LambdaCodeKey="${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar"
+      - LambdaCodeKey=${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar
       - Lambdahandler=$HANDLER_NAME
     capabilities: CAPABILITY_IAM
     region: ap-northeast-2
