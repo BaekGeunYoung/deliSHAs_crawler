@@ -66,3 +66,21 @@ Resources:
           JDBC_PASSWORD: !Ref JdbcPassword
           JDBC_URL: !Ref JdbcUrl
           JDBC_USERNAME: 'root'
+
+  ScheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Scheduled Rule"
+      ScheduleExpression: "rate(10 minutes)"
+      State: "DISABLED"
+      Targets:
+        - Arn: !GetAtt CustomResourceLambdaFunction.Arn
+          Id: "TargetFunctionV1"
+
+  PermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission # 타 AWS 리소스 혹은 AWS 계정에 해당 함수를 사용할 권한을 부여한다.
+    Properties:
+      FunctionName: !GetAtt CustomResourceLambdaFunction.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt ScheduledRule.Arn # ScheduledRule 리소스에 함수를 invoke할 권한을 부여함
