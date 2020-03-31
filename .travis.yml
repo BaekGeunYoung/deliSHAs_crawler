@@ -3,10 +3,11 @@ jdk:
   - openjdk11
 
 env:
-  - PACKAGE_VERSION="1.1-SNAPSHOT"
-  - PROJECT_NAME="deliSHAs_crawler"
-  - HANDLER_NAME="Crawler::handleRequest"
-  - BUCKET_NAME="snupa"
+  global:
+    - PACKAGE_VERSION="1.1-SNAPSHOT"
+    - PROJECT_NAME="deliSHAs_crawler"
+    - HANDLER_NAME="Crawler::handleRequest"
+    - BUCKET_NAME="snupa"
 
 branches:
   only:
