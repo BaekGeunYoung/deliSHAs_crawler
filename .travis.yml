@@ -56,5 +56,5 @@ jobs:
             - JdbcPassword=$JDBC_PASSWORD
           capabilities: CAPABILITY_IAM
           region: ap-northeast-2
-      after_deploy:
+      after_success:
         - aws lambda update-function-code --s3-bucket=snupa --s3-key=${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar --region=ap-northeast-2 --function-name=arn:aws:lambda:ap-northeast-2:781718076027:function:deliSHAs_crawler_test
