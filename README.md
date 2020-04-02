@@ -278,8 +278,51 @@ Resources: # (2)
 
 (6) 이 리소스는 타 AWS 리소스 혹은 AWS 계정에 해당 함수를 사용할 권한을 부여한다. ScheduledRule 리소스에 CustomResourceLambdaFunction 함수를 invoke할 권한을 부여해주었다.
 
+### 문제
+
+Serverless 애플리케이션과 Cloudformation 템플릿에 대한 CI & CD 파이프라인 구축을 멋지게 완성하였다. 하지만 한 가지 문제는, 원래 나는 cloudformation이 S3의 빌드 파일의 변화가 있을 때마다 stack을 업데이트하길 기대했는데 실제론 그렇지 않았다. cloudformation은 템플릿 파일의 내용이 변경될 때만 stack을 업데이트하고 있었다.(생각해보면 당연한 것..) 그래서 travis VM에 aws cli를 설치해 lambda 함수 코드를 업데이트하는 명령어를 deploy 스텝 이후에 입력해주었다.
+
+우선 문제를 해결하기 위해 아래와 같은 새 파이프라인을 구상했다.
+
+![](https://images.velog.io/images/dvmflstm/post/a61ccc6e-2eda-49af-ad4e-d4a6e0af1703/image.png)
+
+아래는 코드를 푸시할 때마다 lambda 함수를 s3로부터 받아와서 업데이트할 수 있도록 travis 스크립트를 수정한 내용이다.
+
+`.travis.yml`
+```yaml
+(...생략)
+
+before_install:
+        - pip install -U pip
+        - pip install --user awscli # (1)
+        - mkdir -p ~/.aws
+        - echo -e "[default]\naws_access_key_id = $AWS_ACCESS_KEY\naws_secret_access_key = $AWS_SECRET_KEY" > ~/.aws/credentials #(2)
+        - cat ~/.aws/credentials
+
+(...생략)
+
+after_deploy: # (3)
+        - aws lambda update-function-code
+        --s3-bucket=snupa 
+        --s3-key=${PROJECT_NAME}-${PACKAGE_VERSION}-all.jar
+        --region=ap-northeast-2
+        --function-name=[함수 이름 혹은 ARN]
+```
+
+#### 설명
+
+(1) aws-cli를 설치한다.
+
+(2) AWS credential를 설정해준다.
+
+(3) deploy 스텝이 끝난 후에 실행할 명령어, update-function-code 명령으로 함수를 업데이트한다.
+
+
+이렇게 travis를 실행하게 되면 아래처럼 성공적으로 lambda 함수 코드가 업데이트 되는 것을 확인할 수 있다.
+
+![](https://images.velog.io/images/dvmflstm/post/fde82e75-0ac1-4101-b911-2c1aa394546c/image.png)
+
+
 ### 요약
 
-travis CI와 AWS cloudformation을 이용해 serverless 앱에 대한 CI & CD 파이프라인을 구축해보았다. cloudformation은 처음 사용해보는거라 미숙한 점이 많지만, 코드로 인프라를 관리하는 것의 매력을 확실히 느낄 수 있었고 AWS 전반에 대한 이해도 또한 한 층 높일 수 있었다.
-
-다만 내가 구축한 파이프라인은 IaC 도구를 무조건 사용해봐야겠다고 마음먹고 만들었기 때문에, 일반적으로 통용되는 방식인지에 대해서는 좀 더 공부해볼 필요가 있다고 생각한다.
+travis CI와 AWS cloudformation을 이용해 serverless 앱에 대한 CI & CD 파이프라인을 구축해보았다. 사실 본래의 목적을 달성하기 위해서 cloudformation은 필요없는 선택지였다는 것을 뒤늦게 깨달았지만, IaC 도구를 공부해보고 CI&CD와 연동해서 적용해본 것은 가치있는 경험이었다고 생각한다. cloudformation은 처음 사용해보는거라 미숙한 점이 많지만, 코드로 인프라를 관리하는 것의 매력을 확실히 느낄 수 있었고 AWS 전반에 대한 이해도 또한 한 층 높일 수 있었다.
