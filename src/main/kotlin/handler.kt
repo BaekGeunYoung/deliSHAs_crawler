@@ -38,6 +38,8 @@ class Crawler: RequestHandler<Any, Unit> {
     }
 
     fun crawl(url: String, date: LocalDate) {
+        insertRestaurant(date)
+
         val ret = mutableListOf<Menu>()
 
         Jsoup.connect(url).get().run {
@@ -144,22 +146,62 @@ class Crawler: RequestHandler<Any, Unit> {
         }
     }
 
+    private fun insertRestaurant(date: LocalDate) {
+        val getRestaurantInfoIdQuery = "SELECT id FROM restaurant_info;"
+        var preparedStatement = connection.prepareStatement(getRestaurantInfoIdQuery)
+        val resultSet = preparedStatement.executeQuery()
+        val now = LocalDateTime.now()
+        var insertRestaurantQuery = "INSERT INTO restaurant (date, restaurant_info_id, created_at, updated_at) VALUES "
+        while (resultSet.next()) {
+            val restaurantInfoId = resultSet.getLong("id")
+            insertRestaurantQuery += "('$date', $restaurantInfoId, '$now', '$now'), "
+        }
+
+        insertRestaurantQuery = insertRestaurantQuery.substring(0, insertRestaurantQuery.length - 2)
+
+        preparedStatement = connection.prepareStatement(insertRestaurantQuery)
+        preparedStatement.executeUpdate()
+
+        printAndLog("insert Restaurant success of following date : $date")
+    }
+
     fun deleteAll() {
+        deleteAllMenus()
+        deleteAllRestaurant()
+    }
+
+    private fun deleteAllMenus() {
         val deleteAllQuery = "DELETE FROM menu WHERE id > 0;"
         val preparedStatement = connection.prepareStatement(deleteAllQuery)
         preparedStatement.executeUpdate()
-        printAndLog("delete success")
+        printAndLog("delete menus success")
+    }
+
+    private fun deleteAllRestaurant() {
+        val deleteAllQuery = "DELETE FROM restaurant WHERE id > 0;"
+        val preparedStatement = connection.prepareStatement(deleteAllQuery)
+        preparedStatement.executeUpdate()
+        printAndLog("delete restaurant success")
     }
 
     private fun getRestaurantId(menu: Menu): Long {
-        val getRestaurantIdQuery = "SELECT id FROM restaurant WHERE name = '${menu.restaurantName}';"
-        val preparedStatement = connection.prepareStatement(getRestaurantIdQuery)
-        val resultSet = preparedStatement.executeQuery()
+        val getRestaurantInfoIdQuery = "SELECT id FROM restaurant_info WHERE name = '${menu.restaurantName}';"
+        var preparedStatement = connection.prepareStatement(getRestaurantInfoIdQuery)
+        val restaurantInfoIdSet = preparedStatement.executeQuery()
 
-        if(resultSet.next()) {
-            val restaurantId = resultSet.getLong("id")
-            printAndLog("getRestaurantId success : $restaurantId, ${menu.restaurantName}")
-            return restaurantId
+        if(restaurantInfoIdSet.next()) {
+            val restaurantInfoId = restaurantInfoIdSet.getLong("id")
+            val getRestaurantIdQuery = "SELECT id FROM restaurant WHERE restaurant_info_id = '$restaurantInfoId';"
+            preparedStatement = connection.prepareStatement(getRestaurantIdQuery)
+            val restaurantIdSet = preparedStatement.executeQuery()
+
+            if (restaurantIdSet.next()) {
+                val restaurantId = restaurantIdSet.getLong("id")
+                printAndLog("getRestaurantId success : $restaurantId, ${menu.restaurantName}")
+                return restaurantId
+            } else {
+                throw Exception("getRestaurantId fail : ${menu.restaurantName}")
+            }
         } else {
             throw Exception("getRestaurantId fail : ${menu.restaurantName}")
         }
