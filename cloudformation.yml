@@ -71,7 +71,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: "Scheduled Rule"
-      ScheduleExpression: "rate(10 minutes)"
+      ScheduleExpression: "cron(0 17 1/3 * ? *)"
       State: "DISABLED"
       Targets:
         - Arn: !GetAtt CustomResourceLambdaFunction.Arn
