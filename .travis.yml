@@ -8,6 +8,7 @@ env:
     - PROJECT_NAME=deliSHAs_crawler
     - HANDLER_NAME=Crawler::handleRequest
     - BUCKET_NAME=snupa
+    - WAS_URL=http://934d2e64.ngrok.io
 
 branches:
   only:
@@ -54,6 +55,7 @@ jobs:
             - Lambdahandler=$HANDLER_NAME
             - JdbcUrl=$JDBC_URL
             - JdbcPassword=$JDBC_PASSWORD
+            - WasUrl=$WAS_URL
           capabilities: CAPABILITY_IAM
           region: ap-northeast-2
       after_deploy:

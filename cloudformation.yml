@@ -17,6 +17,9 @@ Parameters:
   JdbcPassword:
     Type: String
     Description: Jdbc password for db connection
+  WasUrl:
+    Type: String
+    Description: WAS Url
 
 Resources:
   LambdaIAMRole:
@@ -66,6 +69,8 @@ Resources:
           JDBC_PASSWORD: !Ref JdbcPassword
           JDBC_URL: !Ref JdbcUrl
           JDBC_USERNAME: 'root'
+          WAS_URL: !Ref WasUrl
+      MemorySize: 512
 
   ScheduledRule:
     Type: AWS::Events::Rule
