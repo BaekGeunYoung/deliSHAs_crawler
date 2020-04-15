@@ -21,4 +21,6 @@ fun main() {
         crawler.crawl(url, date)
         println("=======================================================================")
     }
+
+    crawler.sendRefreshRequest()
 }

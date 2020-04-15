@@ -7,6 +7,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import org.jsoup.Jsoup
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -34,6 +36,18 @@ class Crawler: RequestHandler<Any, Unit> {
             printAndLog("crawling start : $day")
             crawl(url, date)
             printAndLog("==========================================================================")
+        }
+
+        //WAS의 도메인 및 SSL이 나오면 그때 활성화시키자.
+        //sendRefreshRequest()
+    }
+
+    fun sendRefreshRequest() {
+        val url = URL("${Constants.WAS_URL}/api/v1/restaurants/")
+
+        with(url.openConnection() as HttpURLConnection) {
+            requestMethod = "POST"
+            println("Sent refresh request to URL : $url, Response Code : $responseCode")
         }
     }
 
@@ -212,7 +226,7 @@ class Crawler: RequestHandler<Any, Unit> {
 
         val now = LocalDateTime.now()
         val insertMenuQuery = "INSERT INTO menu (name, price, meal_time, msg, restaurant_id, date, is_valid, created_at, updated_at)" +
-                " VALUES ('${menu.name?.trim()}', ${menu.price}, '${menu.time.name}', '${menu.msg}', $restaurantId, '$date', ${menu.isValid}, '$now', '$now');"
+                " VALUES ('${menu.name?.trim()}', ${menu.price}, '${menu.time.name}', '${menu.msg?.trim()}', $restaurantId, '$date', ${menu.isValid}, '$now', '$now');"
 
         val preparedStatement = connection.prepareStatement(insertMenuQuery)
         preparedStatement.executeUpdate()
@@ -229,7 +243,7 @@ class Crawler: RequestHandler<Any, Unit> {
     }
 
     private fun printAndLog(str: String) {
-//        println(str)
-        logger.log(str)
+        println(str)
+//        logger.log(str)
     }
 }
