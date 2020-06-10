@@ -32,7 +32,9 @@ class Parser {
         }
 
         fun convert4Sicdang(floor: Int, html: Element, regexForPrice: Regex): List<MenuInfo> {
-            val menuInfos = html.select("p").map {
+            val menuInfos = html.select("p").filter {
+                    !decode(it.text()).trim().isBlank()
+                }.map {
                     getMenuInfo(decode(it.text()), regexForPrice)
                 }
 
@@ -77,7 +79,9 @@ class Parser {
                     val longStr1 = decode(html.select("p")[1].html())
                     val longStr2 = decode(html.select("p")[2].html())
 
-                    val menuTypeOneName = "봄 - ${longStr1.split("<br />")[2].trim()}"
+                    val splitLongStr1 = longStr1.split("<br />")
+
+                    val menuTypeOneName = "봄 - ${splitLongStr1[splitLongStr1.size - 1].trim()}"
                     val price = 6000
 
                     ret.add(MenuInfo(menuTypeOneName, price, null))
@@ -152,7 +156,7 @@ class Parser {
             }
 
             if (price == null || menuName == null) {
-                msg = str
+                msg = str.trim()
             }
 
             return MenuInfo(
