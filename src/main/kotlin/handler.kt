@@ -65,10 +65,31 @@ class Crawler: RequestHandler<Any, Unit> {
 
                     val restaurant = separateContact(infos[0].text())
 
-                    if (restaurant[0] == "공대간이식당" || restaurant[0] == "소담마루" || restaurant[0] == "샤반" || restaurant[0] == "라운지오")
-                        return@lit
-
                     when {
+                        isFixedCase(restaurant[0]) -> {
+                            val lunch = Menu(
+                                restaurantName = restaurant[0]!!,
+                                time = Time.LUNCH,
+                                date = date,
+                                name = infos[2].select("p")[0].text(),
+                                price = null,
+                                msg = null,
+                                isValid = true
+                            )
+
+                            val dinner = Menu(
+                                restaurantName = restaurant[0]!!,
+                                time = Time.DINNER,
+                                date = date,
+                                name = infos[3].select("p")[0].text(),
+                                price = null,
+                                msg = null,
+                                isValid = true
+                            )
+
+                            ret.add(lunch)
+                            ret.add(dinner)
+                        }
                         isGeneralCase(restaurant[0]) -> {
                             val regexForPrice = Regex("[0-9,]+원")
 
@@ -233,6 +254,12 @@ class Crawler: RequestHandler<Any, Unit> {
         printAndLog("insertMenu success : ${menu.name}")
     }
 
+    private fun isFixedCase(restaurantName: String?): Boolean {
+        return restaurantName != null
+                && (restaurantName == "라운지오"
+                || restaurantName == "샤반"
+                || restaurantName == "소담마루")
+    }
 
     private fun isGeneralCase(restaurantName: String?): Boolean {
         return restaurantName != null
